@@ -1,0 +1,20 @@
+#!/usr/bin/env node
+
+// Check Node.js version
+const currentNodeVersion = process.versions.node;
+const semver = currentNodeVersion.split('.');
+const major = parseInt(semver[0], 10);
+
+if (major < 18) {
+  console.error(
+    'You are running Node.js ' +
+      currentNodeVersion +
+      '.\n' +
+      'Yunxiao CLI requires Node.js 18 or higher.\n' +
+      'Please update your version of Node.js.'
+  );
+  process.exit(1);
+}
+
+// Import compiled CLI
+require('../dist/index.js');
