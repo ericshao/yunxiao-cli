@@ -53,23 +53,31 @@ async function listHistory(pipelineId: string, options: PipelineHistoryOptions):
 
   logger.verbose(`Fetching job history for pipeline ${pipelineId}...`);
 
-  const response = await withProgress('Fetching pipeline job history...', async () => {
-    return client.listPipelineJobHistorys({
-      pipelineId,
-      category: options.category!,
-      identifier: options.identifier!,
-      page,
-      perPage,
-    });
-  });
+  const outputFormat = options.json ? 'json' : options.output || 'table';
+
+  const response = await withProgress(
+    'Fetching pipeline job history...',
+    async () => {
+      return client.listPipelineJobHistorys({
+        pipelineId,
+        category: options.category!,
+        identifier: options.identifier!,
+        page,
+        perPage,
+      });
+    },
+    { silent: outputFormat === 'json' }
+  );
 
   if (response.data.length === 0) {
+    if (outputFormat === 'json') {
+      console.log(formatJson([]));
+      return;
+    }
+
     logger.info('No job history found');
     return;
   }
-
-  // 输出格式化
-  const outputFormat = options.json ? 'json' : options.output || 'table';
 
   switch (outputFormat) {
     case 'json':
@@ -84,7 +92,7 @@ async function listHistory(pipelineId: string, options: PipelineHistoryOptions):
     `Showing ${response.data.length} of ${response.pagination.total} records (page ${response.pagination.page}/${response.pagination.totalPages})`
   );
 
-  if (response.pagination.hasNextPage) {
+  if (outputFormat === 'table' && response.pagination.hasNextPage) {
     logger.info(
       `\nTo see more, run: yunxiao pipeline history ${pipelineId} --category ${options.category} --identifier ${options.identifier} --page=${page + 1}`
     );

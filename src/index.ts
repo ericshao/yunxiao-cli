@@ -12,6 +12,8 @@ import { createWorkitemCommand } from './commands/workitem';
 import { createCommentCommand } from './commands/comment';
 import { createConfigCommand } from './commands/config';
 import { createPipelineCommand } from './commands/pipeline';
+import { createServiceConnectionCommand } from './commands/service-connection';
+import { createServiceCredentialCommand } from './commands/service-credential';
 import * as packageJson from '../package.json';
 
 const program = new Command();
@@ -22,7 +24,7 @@ async function main() {
     program
       .name('yunxiao')
       .description(
-        'Aliyun Yunxiao (云效) CLI tool for workitem, comment, config and pipeline management'
+        'Aliyun Yunxiao (云效) CLI tool for workitem, comment, config, service connection and pipeline management'
       )
       .version(packageJson.version, '-v, --version', 'Output the version number')
       .option('--verbose', 'Show verbose output', false)
@@ -49,8 +51,14 @@ Examples:
   $ yunxiao wi list --assigned-to=@me
   $ yunxiao pipeline list --status=SUCCESS,RUNNING
   $ yunxiao pipeline view 12345
+  $ yunxiao pipeline create --name "My Pipeline" --file pipeline.yaml
   $ yunxiao pipeline update 12345 --name "My Pipeline" --file pipeline.yaml
   $ yunxiao pipeline history 12345 --category DEPLOY --identifier deploy-job
+  $ yunxiao pipeline job-run 12345 67890 1
+  $ yunxiao pipeline job-log 12345 67890 1
+  $ yunxiao pipeline group-add 40164 12345
+  $ yunxiao service-connection list --type codeup
+  $ yunxiao service-credential list --type Codeup
 
 Configuration:
   ${configManager.getConfigPath()}
@@ -65,6 +73,8 @@ Learn more:
     program.addCommand(createWorkitemCommand());
     program.addCommand(createCommentCommand());
     program.addCommand(createConfigCommand());
+    program.addCommand(createServiceConnectionCommand());
+    program.addCommand(createServiceCredentialCommand());
     program.addCommand(createPipelineCommand());
 
     // 解析命令

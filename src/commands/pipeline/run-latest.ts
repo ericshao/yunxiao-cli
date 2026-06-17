@@ -7,6 +7,10 @@ import { getAuthenticatedClient } from '../../utils/auth';
 import { logger } from '../../utils/logger';
 import { formatPipelineRunDetail } from '../../formatters/table';
 import { formatJson } from '../../formatters/json';
+import {
+  formatPipelineRunSummary,
+  summarizePipelineRun,
+} from '../../formatters/pipeline-run-summary';
 import { withProgress } from '../../utils/progress';
 import { ViewPipelineRunOptions } from '../../types/cli';
 
@@ -15,6 +19,7 @@ export function createRunLatestCommand(): Command {
     .description('View the latest pipeline run')
     .argument('<pipelineId>', 'Pipeline ID')
     .option('--json', 'Output as JSON')
+    .option('--summary', 'Output a concise run summary without verbose params/results')
     .action(async (pipelineId: string, options: ViewPipelineRunOptions) => {
       try {
         await viewLatestRun(pipelineId, options);
@@ -33,11 +38,18 @@ async function viewLatestRun(pipelineId: string, options: ViewPipelineRunOptions
 
   logger.verbose(`Fetching latest run for pipeline ${pipelineId}...`);
 
-  const run = await withProgress('Fetching latest pipeline run...', async () => {
-    return client.getLatestPipelineRun(pipelineId);
-  });
+  const run = await withProgress(
+    'Fetching latest pipeline run...',
+    async () => {
+      return client.getLatestPipelineRun(pipelineId);
+    },
+    { silent: options.json }
+  );
 
-  if (options.json) {
+  if (options.summary) {
+    const summary = summarizePipelineRun(run);
+    console.log(options.json ? formatJson(summary) : formatPipelineRunSummary(summary));
+  } else if (options.json) {
     console.log(formatJson(run));
   } else {
     console.log(formatPipelineRunDetail(run));

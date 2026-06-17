@@ -49,16 +49,25 @@ async function listGroups(options: ListPipelineGroupsOptions): Promise<void> {
 
   logger.verbose('Fetching pipeline groups...');
 
-  const response = await withProgress('Fetching pipeline groups...', async () => {
-    return client.listPipelineGroups({ page, perPage });
-  });
+  const outputFormat = options.json ? 'json' : options.output || 'table';
+
+  const response = await withProgress(
+    'Fetching pipeline groups...',
+    async () => {
+      return client.listPipelineGroups({ page, perPage });
+    },
+    { silent: outputFormat === 'json' }
+  );
 
   if (response.data.length === 0) {
+    if (outputFormat === 'json') {
+      console.log(formatJson([]));
+      return;
+    }
+
     logger.info('No pipeline groups found');
     return;
   }
-
-  const outputFormat = options.json ? 'json' : options.output || 'table';
 
   switch (outputFormat) {
     case 'json':
@@ -72,7 +81,7 @@ async function listGroups(options: ListPipelineGroupsOptions): Promise<void> {
     `Showing ${response.data.length} of ${response.pagination.total} groups (page ${response.pagination.page}/${response.pagination.totalPages})`
   );
 
-  if (response.pagination.hasNextPage) {
+  if (outputFormat === 'table' && response.pagination.hasNextPage) {
     logger.info(`\nTo see more, run: yunxiao pipeline group-list --page=${page + 1}`);
   }
 }

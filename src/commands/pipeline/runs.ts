@@ -55,22 +55,31 @@ async function listRuns(pipelineId: string, options: ListPipelineRunsOptions): P
 
   logger.verbose(`Fetching runs for pipeline ${pipelineId}...`);
 
-  const response = await withProgress('Fetching pipeline runs...', async () => {
-    return client.listPipelineRuns({
-      pipelineId,
-      page,
-      perPage,
-      status: options.status,
-      triggerMode: options.triggerMode ? parseInt(options.triggerMode) : undefined,
-    });
-  });
+  const outputFormat = options.json ? 'json' : options.output || 'table';
+
+  const response = await withProgress(
+    'Fetching pipeline runs...',
+    async () => {
+      return client.listPipelineRuns({
+        pipelineId,
+        page,
+        perPage,
+        status: options.status,
+        triggerMode: options.triggerMode ? parseInt(options.triggerMode) : undefined,
+      });
+    },
+    { silent: outputFormat === 'json' }
+  );
 
   if (response.data.length === 0) {
+    if (outputFormat === 'json') {
+      console.log(formatJson([]));
+      return;
+    }
+
     logger.info('No pipeline runs found');
     return;
   }
-
-  const outputFormat = options.json ? 'json' : options.output || 'table';
 
   switch (outputFormat) {
     case 'json':
@@ -84,7 +93,7 @@ async function listRuns(pipelineId: string, options: ListPipelineRunsOptions): P
     `Showing ${response.data.length} of ${response.pagination.total} runs (page ${response.pagination.page}/${response.pagination.totalPages})`
   );
 
-  if (response.pagination.hasNextPage) {
+  if (outputFormat === 'table' && response.pagination.hasNextPage) {
     logger.info(`\nTo see more, run: yunxiao pipeline runs ${pipelineId} --page=${page + 1}`);
   }
 }

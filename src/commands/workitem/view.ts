@@ -45,9 +45,13 @@ async function viewWorkitem(id: string, options: ViewWorkitemOptions): Promise<v
   logger.verbose(`Fetching workitem ${id}...`);
 
   // 获取工作项详情
-  const workitem = await withProgress(`Fetching workitem ${id}...`, async () => {
-    return client.getWorkitem(id);
-  });
+  const workitem = await withProgress(
+    `Fetching workitem ${id}...`,
+    async () => {
+      return client.getWorkitem(id);
+    },
+    { silent: options.json }
+  );
 
   // 输出格式化
   if (options.json) {

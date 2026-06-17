@@ -33,9 +33,13 @@ async function viewGroup(groupId: string, options: GlobalOptions): Promise<void>
 
   logger.verbose(`Fetching pipeline group ${groupId}...`);
 
-  const group = await withProgress(`Fetching pipeline group ${groupId}...`, async () => {
-    return client.getPipelineGroup(groupId);
-  });
+  const group = await withProgress(
+    `Fetching pipeline group ${groupId}...`,
+    async () => {
+      return client.getPipelineGroup(groupId);
+    },
+    { silent: options.json }
+  );
 
   if (options.json) {
     console.log(formatJson(group));

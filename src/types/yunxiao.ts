@@ -184,6 +184,37 @@ export interface YunxiaoConfig {
   baseURL: string;
 }
 
+// ============ Flow 服务连接/凭据相关类型 ============
+
+export interface ServiceConnection {
+  id: number;
+  uuid?: string;
+  name: string;
+  type: string;
+  ownerAccountId?: string;
+  ownerStaffId?: string;
+  createTime?: number;
+}
+
+export interface ListServiceConnectionsRequest {
+  // API 文档中的参数名为 sericeConnectionType（少了 v），需要原样使用。
+  sericeConnectionType?: string;
+}
+
+export interface ServiceCredential {
+  id: number;
+  type: string;
+  name?: string;
+  ownerName?: string;
+  ownerStaffId?: string;
+  editable?: boolean;
+  createTime?: number;
+}
+
+export interface ListServiceCredentialsRequest {
+  serviceCredentialType?: string;
+}
+
 // ============ 流水线相关类型 ============
 
 // 流水线列表项
@@ -255,6 +286,13 @@ export interface PipelineJobHistory {
   status: string; // 'SUCCESS' | 'RUNNING' | 'FAIL' | 'CANCELED' | 'WAITING'
 }
 
+// 流水线任务运行日志
+export interface PipelineJobRunLog {
+  content: string;
+  last: number;
+  more: boolean;
+}
+
 // 流水线请求参数
 export interface ListPipelinesRequest {
   pipelineName?: string;
@@ -268,6 +306,11 @@ export interface ListPipelinesRequest {
 }
 
 export interface UpdatePipelineRequest {
+  name: string;
+  content: string; // 流水线 YAML 描述
+}
+
+export interface CreatePipelineRequest {
   name: string;
   content: string; // 流水线 YAML 描述
 }
@@ -414,4 +457,9 @@ export interface ListPipelineGroupPipelinesRequest {
   executeEndTime?: number;
   page?: number;
   perPage?: number;
+}
+
+export interface AddToPipelineGroupRequest {
+  groupId: number;
+  pipelineIds: string;
 }

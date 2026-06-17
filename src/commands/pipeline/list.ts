@@ -53,23 +53,31 @@ async function listPipelines(options: ListPipelineOptions): Promise<void> {
 
   logger.verbose('Fetching pipelines...');
 
+  const outputFormat = options.json ? 'json' : options.output || 'table';
+
   // 查询流水线
-  const response = await withProgress('Fetching pipelines...', async () => {
-    return client.listPipelines({
-      pipelineName: options.name,
-      statusList: options.status,
-      page,
-      perPage,
-    });
-  });
+  const response = await withProgress(
+    'Fetching pipelines...',
+    async () => {
+      return client.listPipelines({
+        pipelineName: options.name,
+        statusList: options.status,
+        page,
+        perPage,
+      });
+    },
+    { silent: outputFormat === 'json' }
+  );
 
   if (response.data.length === 0) {
+    if (outputFormat === 'json') {
+      console.log(formatJson([]));
+      return;
+    }
+
     logger.info('No pipelines found');
     return;
   }
-
-  // 输出格式化
-  const outputFormat = options.json ? 'json' : options.output || 'table';
 
   switch (outputFormat) {
     case 'json':
@@ -84,7 +92,7 @@ async function listPipelines(options: ListPipelineOptions): Promise<void> {
     `Showing ${response.data.length} of ${response.pagination.total} pipelines (page ${response.pagination.page}/${response.pagination.totalPages})`
   );
 
-  if (response.pagination.hasNextPage) {
+  if (outputFormat === 'table' && response.pagination.hasNextPage) {
     logger.info(`\nTo see more, run: yunxiao pipeline list --page=${page + 1}`);
   }
 }

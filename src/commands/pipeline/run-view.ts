@@ -7,6 +7,10 @@ import { getAuthenticatedClient } from '../../utils/auth';
 import { logger } from '../../utils/logger';
 import { formatPipelineRunDetail } from '../../formatters/table';
 import { formatJson } from '../../formatters/json';
+import {
+  formatPipelineRunSummary,
+  summarizePipelineRun,
+} from '../../formatters/pipeline-run-summary';
 import { withProgress } from '../../utils/progress';
 import { ViewPipelineRunOptions } from '../../types/cli';
 
@@ -16,6 +20,7 @@ export function createRunViewCommand(): Command {
     .argument('<pipelineId>', 'Pipeline ID')
     .argument('<runId>', 'Pipeline Run ID')
     .option('--json', 'Output as JSON')
+    .option('--summary', 'Output a concise run summary without verbose params/results')
     .action(async (pipelineId: string, runId: string, options: ViewPipelineRunOptions) => {
       try {
         await viewRun(pipelineId, runId, options);
@@ -38,11 +43,18 @@ async function viewRun(
 
   logger.verbose(`Fetching pipeline run ${pipelineId}#${runId}...`);
 
-  const run = await withProgress(`Fetching pipeline run...`, async () => {
-    return client.getPipelineRun(pipelineId, runId);
-  });
+  const run = await withProgress(
+    `Fetching pipeline run...`,
+    async () => {
+      return client.getPipelineRun(pipelineId, runId);
+    },
+    { silent: options.json }
+  );
 
-  if (options.json) {
+  if (options.summary) {
+    const summary = summarizePipelineRun(run);
+    console.log(options.json ? formatJson(summary) : formatPipelineRunSummary(summary));
+  } else if (options.json) {
     console.log(formatJson(run));
   } else {
     console.log(formatPipelineRunDetail(run));

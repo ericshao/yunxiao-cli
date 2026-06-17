@@ -13,6 +13,8 @@ import {
   PipelineRunDetail,
   PipelineGroup,
   PipelineGroupPipeline,
+  ServiceConnection,
+  ServiceCredential,
 } from '../types/yunxiao';
 import { formatRelativeTime } from '../utils/date';
 import wrapAnsi from 'wrap-ansi';
@@ -132,6 +134,76 @@ function formatPipelineStatus(status: string): string {
   };
   const colorFn = statusColors[status] || chalk.white;
   return colorFn(status);
+}
+
+/**
+ * 格式化服务连接列表为表格
+ */
+export function formatServiceConnectionTable(connections: ServiceConnection[]): string {
+  const table = new Table({
+    head: [
+      chalk.cyan('ID'),
+      chalk.cyan('UUID'),
+      chalk.cyan('名称'),
+      chalk.cyan('类型'),
+      chalk.cyan('所属账号'),
+      chalk.cyan('创建时间'),
+    ],
+    colWidths: [10, 18, 32, 14, 24, 20],
+    wordWrap: true,
+    style: {
+      head: [],
+      border: [],
+    },
+  });
+
+  for (const connection of connections) {
+    table.push([
+      connection.id.toString(),
+      connection.uuid || 'N/A',
+      connection.name || 'N/A',
+      connection.type || 'N/A',
+      connection.ownerAccountId || connection.ownerStaffId || 'N/A',
+      connection.createTime ? formatRelativeTime(connection.createTime.toString()) : 'N/A',
+    ]);
+  }
+
+  return table.toString();
+}
+
+/**
+ * 格式化服务凭据列表为表格
+ */
+export function formatServiceCredentialTable(credentials: ServiceCredential[]): string {
+  const table = new Table({
+    head: [
+      chalk.cyan('ID'),
+      chalk.cyan('名称'),
+      chalk.cyan('类型'),
+      chalk.cyan('所有人'),
+      chalk.cyan('员工 ID'),
+      chalk.cyan('可编辑'),
+    ],
+    colWidths: [10, 28, 14, 18, 24, 10],
+    wordWrap: true,
+    style: {
+      head: [],
+      border: [],
+    },
+  });
+
+  for (const credential of credentials) {
+    table.push([
+      credential.id.toString(),
+      credential.name || 'N/A',
+      credential.type || 'N/A',
+      credential.ownerName || 'N/A',
+      credential.ownerStaffId || 'N/A',
+      credential.editable === undefined ? 'N/A' : credential.editable ? '是' : '否',
+    ]);
+  }
+
+  return table.toString();
 }
 
 /**

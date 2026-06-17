@@ -55,22 +55,31 @@ async function listGroupPipelines(
 
   logger.verbose(`Fetching pipelines for group ${groupId}...`);
 
-  const response = await withProgress('Fetching group pipelines...', async () => {
-    return client.listPipelineGroupPipelines({
-      groupId: parseInt(groupId),
-      pipelineName: options.name,
-      statusList: options.status,
-      page,
-      perPage,
-    });
-  });
+  const outputFormat = options.json ? 'json' : options.output || 'table';
+
+  const response = await withProgress(
+    'Fetching group pipelines...',
+    async () => {
+      return client.listPipelineGroupPipelines({
+        groupId: parseInt(groupId),
+        pipelineName: options.name,
+        statusList: options.status,
+        page,
+        perPage,
+      });
+    },
+    { silent: outputFormat === 'json' }
+  );
 
   if (response.data.length === 0) {
+    if (outputFormat === 'json') {
+      console.log(formatJson([]));
+      return;
+    }
+
     logger.info('No pipelines found in this group');
     return;
   }
-
-  const outputFormat = options.json ? 'json' : options.output || 'table';
 
   switch (outputFormat) {
     case 'json':
@@ -84,7 +93,7 @@ async function listGroupPipelines(
     `Showing ${response.data.length} of ${response.pagination.total} pipelines (page ${response.pagination.page}/${response.pagination.totalPages})`
   );
 
-  if (response.pagination.hasNextPage) {
+  if (outputFormat === 'table' && response.pagination.hasNextPage) {
     logger.info(
       `\nTo see more, run: yunxiao pipeline group-pipelines ${groupId} --page=${page + 1}`
     );

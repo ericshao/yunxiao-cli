@@ -103,25 +103,34 @@ async function listWorkitems(options: ListWorkitemOptions): Promise<void> {
     });
   }
 
+  // 输出格式化
+  const outputFormat = options.json ? 'json' : options.output || 'table';
+
   // 查询工作项
-  const response = await withProgress('Fetching workitems...', async () => {
-    return client.searchWorkitems({
-      spaceId: projectId,
-      category: 'Req,Task,Bug,Defect',
-      page,
-      perPage,
-      conditions:
-        conditions.length > 0 ? JSON.stringify({ conditionGroups: [conditions] }) : undefined,
-    });
-  });
+  const response = await withProgress(
+    'Fetching workitems...',
+    async () => {
+      return client.searchWorkitems({
+        spaceId: projectId,
+        category: 'Req,Task,Bug,Defect',
+        page,
+        perPage,
+        conditions:
+          conditions.length > 0 ? JSON.stringify({ conditionGroups: [conditions] }) : undefined,
+      });
+    },
+    { silent: outputFormat === 'json' }
+  );
 
   if (response.data.length === 0) {
+    if (outputFormat === 'json') {
+      console.log(formatWorkitemJson([]));
+      return;
+    }
+
     logger.info('No workitems found');
     return;
   }
-
-  // 输出格式化
-  const outputFormat = options.json ? 'json' : options.output || 'table';
 
   switch (outputFormat) {
     case 'json':
@@ -142,7 +151,7 @@ async function listWorkitems(options: ListWorkitemOptions): Promise<void> {
     `Showing ${response.data.length} of ${response.pagination.total} workitems (page ${response.pagination.page}/${response.pagination.totalPages})`
   );
 
-  if (response.pagination.hasNextPage) {
+  if (outputFormat === 'table' && response.pagination.hasNextPage) {
     logger.info(`\nTo see more, run: yunxiao workitem list --page=${page + 1}`);
   }
 }

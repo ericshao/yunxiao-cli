@@ -4,13 +4,14 @@
 [![npm version](https://badge.fury.io/js/yunxiao-cli.svg)](https://www.npmjs.com/package/yunxiao-cli)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
-> 面向阿里云云效（Yunxiao）的命令行工具，支持工作项、评论、流水线与配置管理。
+> 面向阿里云云效（Yunxiao）的命令行工具，支持工作项、评论、流水线、服务连接与配置管理。
 
 ## 特性
 
 - 🚀 **工作项管理**：列出、查看、创建、更新工作项
 - 💬 **评论操作**：为工作项添加与查看评论
 - 🔄 **流水线管理**：管理流水线、流水线组、运行记录与执行历史
+- 🔌 **服务连接/凭据查询**：查询 Flow 服务连接 uuid 与服务凭据
 - 📊 **多种输出格式**：表格、JSON、CSV、Markdown
 - 🔐 **安全认证**：安全的 Token 存储
 - 🎨 **美观的 CLI**：彩色输出与进度指示器
@@ -91,23 +92,40 @@ yunxiao config list
 yunxiao config path
 ```
 
+### 服务连接与凭据
+
+```bash
+yunxiao service-connection list             # 列出 Flow 服务连接
+yunxiao service-connection list --type codeup --json
+yunxiao service-credential list             # 列出 Flow 服务凭据
+yunxiao service-credential list --type Codeup --json
+```
+
 ### 流水线管理
 
 ```bash
 yunxiao pipeline list                       # 列出流水线
 yunxiao pipeline view <pipeline-id>         # 查看流水线详情
+yunxiao pipeline create --name "Name" --file pipeline.yaml
 yunxiao pipeline update <id> --name "Name" --file pipeline.yaml
 yunxiao pipeline history <id> --category DEPLOY --identifier deploy-job
 yunxiao pipeline run <id>                   # 触发流水线运行
 yunxiao pipeline runs <id>                  # 列出流水线运行记录
 yunxiao pipeline run-view <pipeline-id> <run-id>
 yunxiao pipeline run-latest <pipeline-id>
+yunxiao pipeline run-latest <pipeline-id> --summary --json
+yunxiao pipeline job-run <pipeline-id> <run-id> <job-id>
+yunxiao pipeline job-log <pipeline-id> <run-id> <job-id>
 
 # 流水线组
 yunxiao pipeline group-list
 yunxiao pipeline group-view <group-id>
+yunxiao pipeline group-add <group-id> <pipeline-id> [pipeline-id...]
 yunxiao pipeline group-pipelines <group-id>
 ```
+
+`--json` 输出会关闭进度提示，方便直接交给 `jq` 等工具处理。运行详情命令可加
+`--summary` 过滤掉 job params/result/actions 等大字段，只保留状态、触发信息、提交和阶段任务摘要。
 
 ## 配置
 

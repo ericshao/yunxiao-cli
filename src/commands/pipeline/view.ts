@@ -33,9 +33,13 @@ async function viewPipeline(pipelineId: string, options: ViewPipelineOptions): P
 
   logger.verbose(`Fetching pipeline ${pipelineId}...`);
 
-  const pipeline = await withProgress(`Fetching pipeline ${pipelineId}...`, async () => {
-    return client.getPipeline(pipelineId);
-  });
+  const pipeline = await withProgress(
+    `Fetching pipeline ${pipelineId}...`,
+    async () => {
+      return client.getPipeline(pipelineId);
+    },
+    { silent: options.json }
+  );
 
   // 输出格式化
   if (options.json) {

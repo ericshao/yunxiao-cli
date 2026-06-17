@@ -4,12 +4,12 @@
 
 import { Command } from 'commander';
 import chalk from 'chalk';
-import ora from 'ora';
 import Table from 'cli-table3';
 import { getAuthenticatedClient } from '../../utils/auth';
 import { logger } from '../../utils/logger';
 import { isValidWorkitemId } from '../../utils/validators';
 import { formatDate } from '../../utils/date';
+import { withProgress } from '../../utils/progress';
 import { WorkitemComment } from '../../types/yunxiao';
 import wrapAnsi from 'wrap-ansi';
 
@@ -37,17 +37,20 @@ export function createListCommand(): Command {
         const client = await getAuthenticatedClient();
 
         // 获取评论列表
-        const spinner = ora('Fetching comments...').start();
-        let comments: WorkitemComment[];
-        try {
-          comments = await client.getWorkitemComments(workitemId);
-          spinner.succeed(`Fetched ${chalk.cyan(comments.length)} comment(s)`);
-        } catch (error) {
-          spinner.fail('Failed to fetch comments');
-          throw error;
-        }
+        const comments = await withProgress(
+          'Fetching comments...',
+          async () => {
+            return client.getWorkitemComments(workitemId);
+          },
+          { silent: options.json }
+        );
 
         if (comments.length === 0) {
+          if (options.json) {
+            console.log(JSON.stringify([], null, 2));
+            return;
+          }
+
           logger.info(chalk.yellow('\nNo comments found.'));
           return;
         }

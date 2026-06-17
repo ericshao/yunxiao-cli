@@ -59,6 +59,14 @@ export interface ApiError extends Error {
   response?: unknown;
 }
 
+export interface ListServiceConnectionsOptions extends GlobalOptions {
+  type?: string;
+}
+
+export interface ListServiceCredentialsOptions extends GlobalOptions {
+  type?: string;
+}
+
 export interface ListPipelineOptions extends GlobalOptions {
   name?: string;
   status?: string;
@@ -68,6 +76,12 @@ export interface ListPipelineOptions extends GlobalOptions {
 
 export interface ViewPipelineOptions extends GlobalOptions {
   // json already covered by GlobalOptions
+}
+
+export interface CreatePipelineOptions extends GlobalOptions {
+  name?: string;
+  content?: string;
+  file?: string;
 }
 
 export interface UpdatePipelineOptions extends GlobalOptions {
@@ -98,7 +112,15 @@ export interface ListPipelineRunsOptions extends GlobalOptions {
 }
 
 export interface ViewPipelineRunOptions extends GlobalOptions {
-  // json covered by GlobalOptions
+  summary?: boolean;
+}
+
+export interface ExecutePipelineJobRunOptions extends GlobalOptions {
+  // json already covered by GlobalOptions
+}
+
+export interface ViewPipelineJobRunLogOptions extends GlobalOptions {
+  // json already covered by GlobalOptions
 }
 
 export interface ListPipelineGroupsOptions extends GlobalOptions {
@@ -111,4 +133,8 @@ export interface ListPipelineGroupPipelinesOptions extends GlobalOptions {
   status?: string;
   page?: number;
   perPage?: number;
+}
+
+export interface AddToPipelineGroupOptions extends GlobalOptions {
+  // json already covered by GlobalOptions
 }

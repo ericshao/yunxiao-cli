@@ -152,6 +152,9 @@ yunxiao pipeline list --status=SUCCESS,RUNNING
 # 查看流水线详情
 yunxiao pipeline view 12345
 
+# 创建流水线
+yunxiao pipeline create --name "My Pipeline" --file pipeline.yaml
+
 # 更新流水线
 yunxiao pipeline update 12345 --name "My Pipeline" --file pipeline.yaml
 
@@ -165,10 +168,16 @@ yunxiao pipeline run 12345
 yunxiao pipeline runs 12345
 yunxiao pipeline run-view 12345 67890
 yunxiao pipeline run-latest 12345
+yunxiao pipeline run-latest 12345 --summary --json
+
+# 手动运行任务并查看任务日志
+yunxiao pipeline job-run 12345 67890 1
+yunxiao pipeline job-log 12345 67890 1
 
 # 流水线组
 yunxiao pipeline group-list
 yunxiao pipeline group-view <group-id>
+yunxiao pipeline group-add <group-id> <pipeline-id> [pipeline-id...]
 yunxiao pipeline group-pipelines <group-id>
 ```
 
@@ -180,6 +189,18 @@ yunxiao config set defaults.project_id <your-project-id>
 yunxiao config get defaults.project_id
 yunxiao config list
 yunxiao config path
+```
+
+### 服务连接与凭据
+
+```bash
+# 查询 Flow 服务连接，YAML 流水线 certificate.serviceConnection 使用 uuid
+yunxiao service-connection list --type codeup
+yunxiao service-connection list --type codeup --json
+
+# 查询 Flow 服务凭据
+yunxiao service-credential list --type Codeup
+yunxiao service-credential list --type Codeup --json
 ```
 
 ### 调试

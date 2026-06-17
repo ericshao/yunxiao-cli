@@ -17,20 +17,27 @@ import {
   CreateCommentResponse,
   WorkitemAttachment,
   WorkitemFile,
+  ServiceConnection,
+  ListServiceConnectionsRequest,
+  ServiceCredential,
+  ListServiceCredentialsRequest,
   Pipeline,
   PipelineDetail,
   PipelineJobHistory,
   ListPipelinesRequest,
+  CreatePipelineRequest,
   UpdatePipelineRequest,
   ListPipelineJobHistorysRequest,
   PipelineRun,
   PipelineRunDetail,
+  PipelineJobRunLog,
   CreatePipelineRunRequest,
   ListPipelineRunsRequest,
   PipelineGroup,
   PipelineGroupPipeline,
   ListPipelineGroupsRequest,
   ListPipelineGroupPipelinesRequest,
+  AddToPipelineGroupRequest,
 } from '../types/yunxiao';
 
 export class YunxiaoApiClient {
@@ -244,6 +251,15 @@ export class YunxiaoApiClient {
       return response.json() as Promise<T>;
     }
 
+    const text = await response.text();
+    if (text) {
+      try {
+        return JSON.parse(text) as T;
+      } catch {
+        return text as T;
+      }
+    }
+
     return {} as T;
   }
 
@@ -259,6 +275,44 @@ export class YunxiaoApiClient {
       hasNextPage: !!response.headers.get('x-next-page'),
       hasPrevPage: !!response.headers.get('x-prev-page'),
     };
+  }
+
+  // ============ Flow 服务连接/凭据相关 API ============
+
+  /**
+   * 获取服务连接列表
+   */
+  async listServiceConnections(
+    params: ListServiceConnectionsRequest = {}
+  ): Promise<ServiceConnection[]> {
+    const queryParams = new URLSearchParams();
+    if (params.sericeConnectionType) {
+      queryParams.set('sericeConnectionType', params.sericeConnectionType);
+    }
+
+    const queryString = queryParams.toString();
+    const endpoint = `/organizations/${this.config.organizationId}/serviceConnections${queryString ? '?' + queryString : ''}`;
+    const connections = await this.flowRequest<ServiceConnection[]>(endpoint, { method: 'GET' });
+
+    return Array.isArray(connections) ? connections : [];
+  }
+
+  /**
+   * 获取服务凭据列表
+   */
+  async listServiceCredentials(
+    params: ListServiceCredentialsRequest = {}
+  ): Promise<ServiceCredential[]> {
+    const queryParams = new URLSearchParams();
+    if (params.serviceCredentialType) {
+      queryParams.set('serviceCredentialType', params.serviceCredentialType);
+    }
+
+    const queryString = queryParams.toString();
+    const endpoint = `/organizations/${this.config.organizationId}/serviceCredentials${queryString ? '?' + queryString : ''}`;
+    const credentials = await this.flowRequest<ServiceCredential[]>(endpoint, { method: 'GET' });
+
+    return Array.isArray(credentials) ? credentials : [];
   }
 
   // ============ 流水线相关 API ============
@@ -308,6 +362,17 @@ export class YunxiaoApiClient {
   async getPipeline(pipelineId: string): Promise<PipelineDetail> {
     const endpoint = `/organizations/${this.config.organizationId}/pipelines/${pipelineId}`;
     return this.flowRequest<PipelineDetail>(endpoint, { method: 'GET' });
+  }
+
+  /**
+   * 创建流水线
+   */
+  async createPipeline(data: CreatePipelineRequest): Promise<number> {
+    const endpoint = `/organizations/${this.config.organizationId}/pipelines`;
+    return this.flowRequest<number>(endpoint, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
   }
 
   /**
@@ -381,6 +446,30 @@ export class YunxiaoApiClient {
   async getLatestPipelineRun(pipelineId: string): Promise<PipelineRunDetail> {
     const endpoint = `/organizations/${this.config.organizationId}/pipelines/${pipelineId}/runs/latestPipelineRun`;
     return this.flowRequest<PipelineRunDetail>(endpoint, { method: 'GET' });
+  }
+
+  /**
+   * 手动运行流水线任务
+   */
+  async executePipelineJobRun(
+    pipelineId: string,
+    pipelineRunId: string,
+    jobId: string
+  ): Promise<boolean> {
+    const endpoint = `/organizations/${this.config.organizationId}/pipelines/${pipelineId}/pipelineRuns/${pipelineRunId}/jobs/${jobId}/start`;
+    return this.flowRequest<boolean>(endpoint, { method: 'POST' });
+  }
+
+  /**
+   * 查询流水线任务运行日志
+   */
+  async getPipelineJobRunLog(
+    pipelineId: string,
+    pipelineRunId: string,
+    jobId: string
+  ): Promise<PipelineJobRunLog> {
+    const endpoint = `/organizations/${this.config.organizationId}/pipelines/${pipelineId}/runs/${pipelineRunId}/job/${jobId}/log`;
+    return this.flowRequest<PipelineJobRunLog>(endpoint, { method: 'GET' });
   }
 
   /**
@@ -496,6 +585,18 @@ export class YunxiaoApiClient {
       data: Array.isArray(pipelines) ? pipelines : [],
       pagination,
     };
+  }
+
+  /**
+   * 将流水线加入流水线分组
+   */
+  async addToPipelineGroup(params: AddToPipelineGroupRequest): Promise<boolean> {
+    const queryParams = new URLSearchParams();
+    queryParams.set('pipelineIds', params.pipelineIds);
+    queryParams.set('groupId', params.groupId.toString());
+
+    const endpoint = `/organizations/${this.config.organizationId}/pipelineGroups/join?${queryParams.toString()}`;
+    return this.flowRequest<boolean>(endpoint, { method: 'POST' });
   }
 }
 
