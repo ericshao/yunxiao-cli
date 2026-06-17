@@ -56,7 +56,7 @@ Configuration:
   ${configManager.getConfigPath()}
 
 Learn more:
-  https://github.com/c2cloud/yunxiao-cli
+  https://github.com/ericshao/yunxiao-cli
 `
       );
 

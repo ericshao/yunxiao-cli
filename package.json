@@ -11,9 +11,9 @@
     "workitem",
     "云效"
   ],
-  "homepage": "https://github.com/c2cloud/yunxiao-cli#readme",
+  "homepage": "https://github.com/ericshao/yunxiao-cli#readme",
   "bugs": {
-    "url": "https://github.com/c2cloud/yunxiao-cli/issues"
+    "url": "https://github.com/ericshao/yunxiao-cli/issues"
   },
   "license": "MIT",
   "author": "C2Cloud Team",
@@ -37,7 +37,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/c2cloud/yunxiao-cli.git"
+    "url": "git+https://github.com/ericshao/yunxiao-cli.git"
   },
   "scripts": {
     "dev": "ts-node src/index.ts",

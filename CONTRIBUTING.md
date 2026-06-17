@@ -181,8 +181,8 @@ describe('formatWorkitemTable', () => {
 ## Getting Help
 
 - Check the [documentation](./README.md)
-- Search [existing issues](https://github.com/c2cloud/yunxiao-cli/issues)
-- Ask in [discussions](https://github.com/c2cloud/yunxiao-cli/discussions)
+- Search [existing issues](https://github.com/ericshao/yunxiao-cli/issues)
+- Ask in [discussions](https://github.com/ericshao/yunxiao-cli/discussions)
 
 ## Recognition
 

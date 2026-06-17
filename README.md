@@ -1,6 +1,6 @@
 # Yunxiao CLI（云效命令行工具）
 
-[![CI](https://github.com/c2cloud/yunxiao-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/c2cloud/yunxiao-cli/actions/workflows/ci.yml)
+[![CI](https://github.com/ericshao/yunxiao-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/ericshao/yunxiao-cli/actions/workflows/ci.yml)
 [![npm version](https://badge.fury.io/js/yunxiao-cli.svg)](https://www.npmjs.com/package/yunxiao-cli)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
